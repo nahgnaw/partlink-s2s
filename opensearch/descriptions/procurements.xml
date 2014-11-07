@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+	xmlns:geo="http://a9.com/-/opensearch/extensions/geo/1.0/"
+	xmlns:time="http://a9.com/-/opensearch/extensions/time/1.0/"
+	xmlns:partlink="http://partlink.tw.rpi.edu/ontologies/partlink-s2s.ttl#"
+	xmlns:core="http://escience.rpi.edu/ontology/sesf/s2s-core/4/0/">
+
+  <ShortName>PartLink Procurement Search</ShortName>
+  <Description>
+  	PartLink Procurement Search Service. This opensearch
+  	document describes how to call the various RESTful services in order
+  	to fill s2s search facets, the result procurement set, and a map
+  	displaying the locations of the CAGEs of the result procurements.
+  </Description>
+  <Tags></Tags>
+  <Contact>Han Wang</Contact>
+
+  <Url type="application/json" rel="partlink:PartClassesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=part_classes&amp;contract_numbers={partlink:ContractNumbers?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:NetPricesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=net_prices&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:OrderQuantitiesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=order_quantities&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:UnitsOfIssueQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=units_of_issue&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:AwardDatesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=award_dates&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:PurchaseOrderChangeDatesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=purchase_order_change_dates&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}" />
+
+  <Url type="application/json" rel="partlink:DataInDBDatesQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=data_in_db_dates&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}" />
+
+  <Url type="text/html" rel="partlink:ResultsListQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=procurements&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}&amp;limit={count}&amp;offset={startIndex}" />
+
+  <Url type="application/json" rel="partlink:ResultsMapQuery" template="http://partlink.tw.rpi.edu/opensearch/services/procurements/search.php?request=procurements_map&amp;contract_numbers={partlink:ContractNumbers?}&amp;part_classes={partlink:PartClasses?}&amp;net_prices={partlink:NetPrices?}&amp;order_quantities={partlink:OrderQuantities?}&amp;units_of_issue={partlink:UnitsOfIssue?}&amp;award_dates={partlink:AwardDates?}&amp;purchase_order_change_dates={partlink:PurchaseOrderChangeDates?}&amp;data_in_db_dates={partlink:DataInDBDates?}&amp;limit={count}&amp;offset={startIndex}" />
+
+  <LongName>PartLink Procurement Search Service</LongName>
+  <Developer>Han Wang</Developer>
+  <Attribution></Attribution>
+  <SyndicationRight>open</SyndicationRight>
+  <AdultContent>false</AdultContent>
+  <Language>en-us</Language>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <InputEncoding>UTF-8</InputEncoding>
+</OpenSearchDescription>
+

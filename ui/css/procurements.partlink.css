@@ -1,0 +1,81 @@
+.clear-button {
+	margin-left: 4px;
+}
+
+.esriPopup {
+	font-size: 10px;
+}
+
+.esriPopup .sizer {
+	width: 360px;
+}
+
+div#results-map {
+	width: 670px;
+	height: 720px;
+}
+
+div.field-site-info {
+	margin-bottom: 5px;
+}
+
+div.popup-thumbnail {
+	float: left;
+	margin-right: 5px;
+}
+
+div.popup-thumbnail img {
+	height: 90px;
+}
+
+div.popup-text {
+	overflow: auto;
+}
+
+div.popup-text p {
+	margin: 0;
+}
+
+div.expander-head {
+	background-position: 25% 60%;
+	background-repeat: no-repeat;
+	background-image: url(../../images/collapsed.gif);
+}
+
+table.order-lines {
+	font-size: 0.9em;
+	text-align: center;
+	border-collapse: collapse
+}
+
+table.order-lines td, th {
+	border: 1px solid #ccc;
+	padding: 2px 0 2px 0
+}
+
+div.slider {
+	width: 95%;
+	margin: 5px 0 5px 3px
+}
+
+input.range {
+	margin-left: 2px
+}
+
+div.range span.max {
+	float: right
+}
+
+div.cage-map {
+	height: 300px;
+	margin-bottom: 5px; 
+}
+
+div.cage-map-info-window-content {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 0.7em
+}
+
+div.cage-map-info-window-content span {
+	font-weight: bold
+}

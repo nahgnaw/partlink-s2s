@@ -1,0 +1,15 @@
+.more {
+	#list-style-image: url(http://partlink.tw.rpi.edu/ui/images/collapsed.gif);
+}
+.leaf { 
+	#list-style-image: none;
+    	#list-style-type: square;
+    	#list-style-position: inside;
+}
+.less {
+	#list-style-image: url(http://partlink.tw.rpi.edu/ui/images/expanded.gif);
+}
+div.data-selector {
+    height: 30em;
+    overflow: auto;
+} 
