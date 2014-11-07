@@ -46,6 +46,9 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.prototype.reset = function()
 edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.prototype.update = function(data)
 {
 	data = JSON.parse(data);
+	data.sort(function(o1, o2) {
+            return (o1.label <= o2.label) ? -1 : 1;
+        });
 	this.selectbox.children().remove();
 	var tree = edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree(data, "http://xsb.com/swiss/product#PART");
 	jQuery(tree).css("margin-left","0px");
@@ -114,9 +117,9 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree = function(tree, ro
 		for (var i = 0; i < tree.length; ++i) {
 	    		if (tree[i]['parent'] == root) {
 				var item = tree[i];
-				var expandCollapsePlus = "http://partlink.tw.rpi.edu/ui/images/collapsed.gif";
-				var expandCollapseMinus = "http://partlink.tw.rpi.edu/ui/images/expanded.gif";
-				var li = jQuery("<li><table><tr><td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer\" class=\"more-icon\" src=\""+expandCollapsePlus+"\"/><img style=\"cursor:pointer\" class=\"less-icon\" src=\""+expandCollapseMinus+"\"/></td><td><span style=\"cursor:pointer\" title=\""+item['label']+" ("+item['count']+" )\"> " + item['label'] + " (" + item['count'] + ") </span></td></tr></table></li>");
+				var expandCollapsePlus = "http://partlink.tw.rpi.edu/ui/images/collapsed.png";
+				var expandCollapseMinus = "http://partlink.tw.rpi.edu/ui/images/expanded.png";
+				var li = jQuery("<li><table><tr><td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer;width:12px\" class=\"more-icon\" src=\""+expandCollapsePlus+"\"/><img style=\"cursor:pointer;width:12px\" class=\"less-icon\" src=\""+expandCollapseMinus+"\"/></td><td><span style=\"cursor:pointer\" title=\""+item['label']+" ("+item['count']+" )\"> " + item['label'] + " (" + item['count'] + ") </span></td></tr></table></li>");
 				var subtree = edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree(tree,item['id']);
 				li.find(".more-icon").hide();
 				li.find(".less-icon").hide();

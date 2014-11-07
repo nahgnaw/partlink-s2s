@@ -39,7 +39,8 @@ div.popup-text p {
 div.expander-head {
 	background-position: 25% 60%;
 	background-repeat: no-repeat;
-	background-image: url(../../images/collapsed.gif);
+	background-size: 12px 12px;
+	background-image: url(../images/collapsed.png);
 }
 
 table.order-lines {

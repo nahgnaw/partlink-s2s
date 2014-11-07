@@ -78,7 +78,8 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 			var style = {
 				"background-position": "25% 60%",
         			"background-repeat": "no-repeat",
-        			"background-image": "url(images/expanded.gif)"
+				"background-size": "12px 12px",
+        			"background-image": "url(images/expanded.png)"
 			};
 			jQuery(this).css(style);
 			
@@ -115,7 +116,8 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 			var style = {
 				"background-position": "25% 60%",
         			"background-repeat": "no-repeat",
-        			"background-image": "url(images/collapsed.gif)"
+				"background-size": "12px 12px",
+        			"background-image": "url(images/collapsed.png)"
 			};
                         jQuery(this).css(style);
 		}
