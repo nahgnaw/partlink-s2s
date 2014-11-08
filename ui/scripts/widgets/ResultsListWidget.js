@@ -266,6 +266,8 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.initializeMap = function
 			var infoWindowContent = "<div class=\"cage-map-info-window-content\"><span>Name: </span>" + data['name'];
 			if (typeof data['code'] != 'undefined')
 				infoWindowContent += "<br /><span>Code: </span>" + data['code'];
+			if (typeof data['status'] != 'undefined')
+				infoWindowContent += "<br /><span>Status: </span>" + data['status'].split('_')[1];
 			if (typeof data['cao'] != 'undefined')
 				infoWindowContent += "<br /><span>CAO: </span>" + data['cao'];
 			if (typeof data['adp'] != 'undefined')

@@ -5,6 +5,8 @@ include_once("opensearch/utils.php");
 $request = null;
 $procurement = null;
 $cage = null;
+$niin = null;
+$uri = null;
 
 if (@$_GET['request'] && @$_GET['request'] != '') {
 	$request = $_GET['request'];
@@ -18,6 +20,14 @@ if (@$_GET['cage'] && @$_GET['cage'] != '') {
 	$cage = $_GET['cage'];
 }
 
+if (@$_GET['niin'] && @$_GET['niin'] != '') {
+	$niin = $_GET['niin'];
+}
+
+if (@$_GET['uri'] && @$_GET['uri'] != '') {
+	$uri = $_GET['uri'];
+}
+
 $results = array();
 switch($request) {
 	case "order_lines":
@@ -26,16 +36,88 @@ switch($request) {
 	case "cage_info":
 		$results = json_encode(getCageInfo($cage));
 		break;
+	case "niin_hierarchy":
+		$results = json_encode(getNiinHierarchy($niin));
+		break;
+	case "niin_info":
+		$results = json_encode(getNiinInfo($niin));
+		break;
+	case "product_info":
+		$results = json_encode(getProductInfoByNiin($niin));
+		break;
+	case "label":
+		$results = json_encode(getLabel($uri));
+		break;
 	default:
 		break;
 }
 echo $results;
 
+function getLabel($uri) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?label WHERE { <$uri> rdfs:label ?label }";
+	return sparqlSelect($query);
+}
+
+function getProductInfoByNiin($niin) {
+	$query .= '';
+	//$query .= getPrefixes();
+	$query .= 'SELECT DISTINCT ?property_label ?property_description (GROUP_CONCAT(DISTINCT ?v ; SEPARATOR=";") AS ?value) WHERE { ';
+	$query .= "<$niin> log:hasProductNIIN ?product . ";
+	$query .= "?product rdfs:subClassOf ?res . ";
+	$query .= "?res a owl:Restriction . ";
+	$query .= "?res owl:onProperty [rdfs:label ?property_label; dcterms:description ?property_description] . ";
+	$query .= "?res owl:hasValue ?v . ";
+	$query .= "} GROUP BY ?property_label ?property_description ";
+	return sparqlSelect($query);
+}
+
+function getNiinInfo($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT ?fsc ?inc ?tiic ?pinc ?status_code ?status_code_def ?acquisition_advice_code ?acquisition_advice_code_def ?acquisition_method_code ?acquisition_method_code_def ?acquisition_method_suffix_code ?acquisition_method_suffix_code_def ?criticality_code ?criticality_code_def ?demilitarization_code ?demilitarization_code_def ?hazardous_material_indicator_code ?hazardous_material_indicator_code_def ?item_standardization_code ?item_standardization_code_def ?precious_metal_indicator_code ?precious_metal_indicator_code_def ?administrative_lead_time ?production_lead_time ?assignment_date ?last_demand_date ?unit_price WHERE { ";
+	$query .= "<$niin> rdfs:label ?label . ";
+	$query .= "OPTIONAL { <$niin> log:hasFSC [rdfs:label ?fsc] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasINC [rdfs:label ?inc] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasTiic ?tiic . } ";
+	$query .= "OPTIONAL { <$niin> log:hasPinc ?pinc . } ";
+	$query .= "OPTIONAL { <$niin> log:hasStatusCode [log:hasCode ?status_code; log:hasDefinition ?status_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasAcquisitionAdviceCode [log:hasCode ?acquisition_advice_code; log:hasDefinition ?acquisition_advice_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasAcquisitionMethodCode [log:hasCode ?acquisition_method_code; log:hasDefinition ?acquisition_method_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasAcquisitionMethodSuffixCode [log:hasCode ?acquisition_method_suffix_code; log:hasDefinition ?acquisition_method_suffix_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasCriticalityCode [log:hasCode ?criticality_code; log:hasDefinition ?criticality_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasDemilitarizationCode [log:hasCode ?demilitarization_code; log:hasDefinition ?demilitarization_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasHazardousMaterialIndicatorCode [log:hasCode ?hazardous_material_indicator_code; log:hasDefinition ?hazardous_material_indicator_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasItemStandardizationCode [log:hasCode ?item_standardization_code; log:hasDefinition ?item_standardization_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasPreciousMetalIndicatorCode [log:hasCode ?precious_metal_indicator_code; log:hasDefinition ?precious_metal_indicator_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasAdministrativeLeadTime ?administrative_lead_time . } ";
+	$query .= "OPTIONAL { <$niin> log:hasProductionLeadTime ?production_lead_time . } ";
+	$query .= "OPTIONAL { <$niin> log:assignmentDate ?assignment_date . } ";
+	$query .= "OPTIONAL { <$niin> log:hasLastDemandDate ?last_demand_date . } ";
+	$query .= "OPTIONAL { <$niin> log:hasProfitCenter ?profit_center . } ";
+	$query .= "OPTIONAL { <$niin> log:hasSupplyChain ?supply_chain . } ";
+	$query .= "OPTIONAL { <$niin> log:hasUnitPrice ?unit_price . } ";
+	$query .= "}";
+	return sparqlSelect($query);
+}
+
+function getNiinHierarchy($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?parent WHERE { ";
+	$query .= "<$niin> rdfs:subClassOf+ ?parent . ";
+	$query .= "FILTER (!isBlank(?parent) && ?parent != owl:Thing) . }";
+	return sparqlSelect($query);
+}
+
 function getCageInfo($cage) {
-	$query = getPrefixes();
-	$query .= "SELECT DISTINCT ?code ?name ?cao ?adp ?woman_owned ?duns ?associated_cage ?street_address ?locality ?region ?country ?postal_code WHERE { ";
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?code ?name ?status ?cao ?adp ?woman_owned ?duns ?associated_cage ?street_address ?locality ?region ?country ?postal_code WHERE { ";
 	$query .= "<$cage> log:hasCageCode ?code . ";
 	$query .= "<$cage> log:hasCageName ?name . ";
+	$query .= "OPTIONAL { <$cage> log:hasCageStatus ?status } . ";
 	$query .= "OPTIONAL { <$cage> log:hasCAO ?cao } . ";
 	$query .= "OPTIONAL { <$cage> log:hasADP ?adp } . ";
 	$query .= "OPTIONAL { <$cage> log:isWomanOwned ?woman_owned } . ";
@@ -51,7 +133,8 @@ function getCageInfo($cage) {
 }
 
 function getOrderLinesByProcurement($procurement) {
-        $query = getPrefixes();
+	$query = '';
+        //$query .= getPrefixes();
         $query .= "SELECT DISTINCT ?order_line ?line_number ?niin ?contract_number ?net_price ?order_quantity ?unit_of_issue ?award_date ?purchase_order_change_date ?data_in_db_date ?cage WHERE { ";
         $query .= "<$procurement> log:hasPurchaseOrderLineNum ?order_line . ";
         $query .= "?order_line log:hasLineNumber ?line_number . ";

@@ -59,8 +59,8 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 
 	private function getPartClassesByParent($parent) {
 	
-		$query = $this->getPrefixes();
-		$query .= "SELECT DISTINCT ?id ?label ?parent WHERE { ";
+		//$query = $this->getPrefixes();
+		$query = "SELECT DISTINCT ?id ?label ?parent WHERE { ";
 		$query .= "?id rdfs:subClassOf <$parent> . ";
 		$query .= "?id rdfs:label ?l . ";
 		$query .= "?id rdfs:subClassOf ?parent . ";
@@ -354,8 +354,8 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 			case "units_of_issue":
 				foreach ($results as $i => $result) {
 					$unit = $result['label'];
-					$query = $this->getPrefixes();
-					$query .= "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
+					//$query = $this->getPrefixes();
+					$query = "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
 					$query .= "?procurement log:hasPurchaseOrderLineNum [log:hasUnitOfIssue \"$unit\"] . } ";
 					$count = $this->getProcurementCountByConstraint($unit, $query);
 					$results[$i]['count'] = $count[0]['count'];
@@ -364,8 +364,8 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 			case "part_classes":
 				foreach ($results as $i => $result) {
 					$partClass = $result['id'];
-					$query = $this->getPrefixes();
-					$query .= "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
+					//$query = $this->getPrefixes();
+					$query = "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
 					$query .= "?procurement log:hasPurchaseOrderLineNum [log:hasNIIN [log:hasProductNIIN [rdfs:subClassOf* <$partClass>]]] . } ";
 					$count = $this->getProcurementCountByConstraint($partClass, $query);
 					$results[$i]['count'] = $count[0]['count'];

@@ -129,7 +129,7 @@ abstract class S2SConfig
 	public function getSelectQuery($type, array $constraints, $limit=null, $offset=0, $sort=null) {
 				
 		$query = "";
-		$query .= $this->getPrefixes();
+		//$query .= $this->getPrefixes();
 		$query .= "SELECT DISTINCT ";
 		$query .= $this->getQueryHeader($type);
 		$query .= " WHERE { ";
@@ -137,7 +137,7 @@ abstract class S2SConfig
 		$query .= $this->getQueryConstraints($constraints);
 		$query .= " }\n ";
 		$query .= $this->getQueryFooter($type, $limit, $offset, $sort);
-		file_put_contents('/partlink/opensearch/services/log/queries.txt', $query, FILE_APPEND);
+		file_put_contents('/partlink/opensearch/services/log/queries.log', $query, FILE_APPEND);
 		return $query;
 	}
 	
