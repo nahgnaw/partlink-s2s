@@ -54,6 +54,11 @@ table.order-lines td, th {
 	padding: 2px 0 2px 0
 }
 
+table.order-lines span.niin {
+	cursor: pointer;
+	color: #ce272e
+}
+
 div.slider {
 	width: 95%;
 	margin: 5px 0 5px 3px
@@ -80,3 +85,45 @@ div.cage-map-info-window-content {
 div.cage-map-info-window-content span {
 	font-weight: bold
 }
+
+div.niin-info-dialog {
+	font-family: Verdana,Arial,sans-serif;
+	font-size: 0.8em
+}
+
+div.niin-info-dialog p {
+	margin: 0 0 0 0
+}
+
+div.niin-info-dialog .tooltip {
+	cursor: pointer;
+}
+
+table.niin-info-logistics {
+	margin-bottom: 10px;
+}
+
+div.niin-info-ref-num {
+	margin-bottom: 10px
+}
+
+table.niin-info-ref-num {
+	width: 570px;
+	border-left: 1px solid #777;
+	margin-bottom: 7px
+}
+
+div.niin-info-dialog table {
+	border-collapse: collapse
+}
+
+div.niin-info-dialog table th {
+	text-align: left;
+	border: none;
+	padding-bottom: 3px; 
+}
+
+div.niin-info-dialog table td {
+	padding: 0 5px 0 4px;
+}
+

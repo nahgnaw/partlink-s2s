@@ -96,7 +96,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 				content.append("<p>CAGE Information:</p>").append(map);
 				table.append("<tr><th style=\"width:8%\">Line Number</th><th style=\"width:12%\">NIIN</th><th style=\"width:18%\">Contract Number</th><th style=\"width:8%\">Net Price</th><th style=\"width:10%\">Order Quantity</th><th style=\"width:8%\">Unit of Issue</th><th style=\"width:12%\">Award Date</th><th style=\"width:12%\">Purchase Order Change Date</th><th style=\"width:12%\">Data in DB Date</th></tr>");
 				jQuery.each(data, function(i, item) {
-					table.append("<tr><td>" + item['line_number'] + "</td><td>" + item['niin'].substring(35) + "</td><td>" + item['contract_number'] + "</td><td>" + item['net_price'] + "</td><td>" + item['order_quantity'] + "</td><td>" + item['unit_of_issue'] + "</td><td>" + item['award_date'] + "</td><td>" + item['purchase_order_change_date'] + "</td><td>" + item['data_in_db_date'] + "</td></tr>");
+					table.append("<tr><td>" + item['line_number'] + "</td><td><span class=\"niin\" id=\"" + item['niin'] + "\">"  + item['niin'].substring(35) + "</span></td><td>" + item['contract_number'] + "</td><td>" + item['net_price'] + "</td><td>" + item['order_quantity'] + "</td><td>" + item['unit_of_issue'] + "</td><td>" + item['award_date'] + "</td><td>" + item['purchase_order_change_date'] + "</td><td>" + item['data_in_db_date'] + "</td></tr>");
 				});
 				var cageData = {uri: data[0]['cage']};
 				jQuery.ajax({
@@ -108,6 +108,110 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 					});
 					var mapDiv = content.find(".cage-map")[0];
 					self.initializeMap(mapDiv, cageData);
+				});
+				jQuery("span.niin").click(function() {
+					var niin = this.id;
+					jQuery.ajax({
+						url: self.queryServiceUrlPrefix + "niin_info&niin=" + encodeURIComponent(niin)
+					}).done(function(data) {
+						data = jQuery.parseJSON(data);
+						var dialog = jQuery("<div class=\"niin-info-dialog\" title=\"NIIN: " + data['label'][0]['label'] + "\"></div>");
+						dialog.tooltip();
+						if (data.hierarchy.length > 0) {
+							var div = jQuery("<div class=\"niin-info-hierarchy\"></div>");
+							div.append("<p style=\"font-weight:bold\">NIIN Hierarchy</p>");
+							dialog.append(div);
+						}
+						if (data.logistics.length > 0) {
+							var logistics = data['logistics'];
+							var table = jQuery("<table class=\"niin-info-logistics\"></table>");
+							table.append("<tr><th colspan=\"2\"><span>NIIN Logistics Information</span></th></tr>");
+							jQuery.each(logistics, function(i, item) {
+								var tr = jQuery("<tr></tr>");
+								var tdProperty = jQuery("<td class=\"tooltip\" style=\"width:50%\"></td>");
+								if (typeof item['property_label'] != 'undefined')
+									tdProperty.html(item['property_label']);
+								else 
+									tdProperty.html(item['property'].split('#')[1].split(/(?=[A-Z])/).join(' '));
+								if (typeof item['property_comment'] != 'undefined')
+									tdProperty.attr('title', item['property_comment']);
+								var tdValue = jQuery("<td class=\"tooltip\"></td>");
+								if (typeof item['value_code'] != 'undefined')
+									tdValue.html(item['value_code']);
+								else if (typeof item['value_label'] != 'undefined')
+									tdValue.html(item['value_label']);
+								else
+									tdValue.html(item['value']);
+								if (typeof item['value_definition'] != 'undefined')
+									tdValue.attr('title', item['value_definition']);
+								tr.append(tdProperty).append(tdValue);
+								table.append(tr);
+							}); 
+							dialog.append(table);
+						}
+						if (data.ref_num.length > 0) {
+							var refNum = data['ref_num'];
+							var div = jQuery("<div class=\"niin-info-ref-num\"></div>");
+							div.append("<p style=\"font-weight:bold;margin-bottom:3px\">NIIN Reference Numbers</p>");
+							jQuery.each(refNum, function(i, item) {
+								var table = jQuery("<table class=\"niin-info-ref-num\"></table>");
+								table.append("<tr><td colspan=\"2\" style=\"font-style:italic\">" + decodeURIComponent(item['ref_num'].split('#')[1]) + "</td></tr>");
+								var trCage = jQuery("<tr><td style=\"width:15%\">CAGE</td><td id=\"" + item['cage'] + "\">" + item['cage_name'] + "</td></tr>");
+								var trPartNum = jQuery("<tr><td>Part Number</td><td>" + item['part_number'] + "</td></tr>");
+								var trRnccrnvc = jQuery("<tr><td class=\"tooltip\" title=\"" + item['rnccrnvc_comment'] + "\">RNCCRNVC</td><td>" + item['rnccrnvc'] + "</td></tr>");
+								table.append(trCage).append(trPartNum).append(trRnccrnvc);
+								div.append(table);
+								
+							});
+							dialog.append(div);
+						}
+						if (typeof data['product'][0].length == 'undefined') {
+							var product = data['product'];
+							var table = jQuery("<table class=\"niin-info-product\"></table>");
+							table.append("<tr><th colspan=\"2\">NIIN Part Properties</th></tr>");
+							jQuery.each(product, function(i, item) {
+								var tr = jQuery("<tr></tr>");
+								var tdProperty = jQuery("<td class=\"tooltip\" title=\"" + item['property_description'] + "\">" + item['property_label'] + "</td>"); 
+								var tdValue = jQuery("<td></td>");
+								var values = item['value'].split(';');
+								jQuery.each(values, function(j, value) {
+									var p = jQuery("<p></p>");
+									jQuery.ajax({
+										url: self.queryServiceUrlPrefix + "product_property_value_info&value=" + encodeURIComponent(value)
+									}).done(function(data) {
+										data = jQuery.parseJSON(data);
+										jQuery.each(data, function(i, d) {
+											var span = jQuery("<span class=\"tooltip\"></span>");
+											var v = '';
+											if (typeof d['value_label'] != 'undefined')
+												v = "\"" + d['value_label'] + "\"";
+											else
+												v = "\"" + d['value'] + "\"";
+											if (typeof d['property_label'] != 'undefined') 
+												span.attr('title', d['property_label']);
+											span.html(v + " ");
+											p.append(span);			
+										});
+									});
+									tdValue.append(p)
+								});
+								tr.append(tdProperty).append(tdValue);
+								table.append(tr);
+							});
+							dialog.append(table);
+						}
+						dialog.dialog({
+							width: 600,
+							show: {
+								effect: "blind",
+								duration: 200
+							},
+							hide: {
+								effect: "blind",
+								duration: 200
+							}	
+						});
+					});
 				});
 			});
 		}

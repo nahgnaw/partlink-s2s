@@ -61,12 +61,19 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	
 		//$query = $this->getPrefixes();
 		$query = "SELECT DISTINCT ?id ?label ?parent WHERE { ";
-		$query .= "?id rdfs:subClassOf <$parent> . ";
+		$query .= "?id rdfs:subClassOf+ <$parent> . ";
 		$query .= "?id rdfs:label ?l . ";
 		$query .= "?id rdfs:subClassOf ?parent . ";
 		$query .= "FILTER (!isBlank(?parent)) . ";
 		$query .= "BIND(str(?l) AS ?label) . } ";
-		return $this->sparqlSelect($query);
+
+		$cacheKey = md5($parent . '_SUBCLASSES');
+		$result = apc_fetch($cacheKey);
+		if ($result == null) {	
+			$result = $this->sparqlSelect($query);
+			apc_store($cacheKey, $result);
+		}
+		return $result;
 	}
 
 	private function getProcurementCountByConstraint($constraint, $query) {
@@ -116,7 +123,7 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 			}
                 }
 		$results = array_merge($results, $new_results);
-		$this->addSearchResultCountForFacet($results, "part_classes");
+		//$this->addSearchResultCountForFacet($results, "part_classes");
 
                 return json_encode($results);
 	}
@@ -397,7 +404,7 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		}
 		else {		
 			//$this->addContextLinks($results, $type);
-			$this->addSearchResultCountForFacet($results, $type);
+			//$this->addSearchResultCountForFacet($results, $type);
 			return $this->getFacetOutput($results);
 		}
 	}

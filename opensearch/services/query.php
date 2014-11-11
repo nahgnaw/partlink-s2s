@@ -7,6 +7,7 @@ $procurement = null;
 $cage = null;
 $niin = null;
 $uri = null;
+$value = null;
 
 if (@$_GET['request'] && @$_GET['request'] != '') {
 	$request = $_GET['request'];
@@ -28,6 +29,10 @@ if (@$_GET['uri'] && @$_GET['uri'] != '') {
 	$uri = $_GET['uri'];
 }
 
+if (@$_GET['value'] && @$_GET['value'] != '') {
+	$value = $_GET['value'];
+}
+
 $results = array();
 switch($request) {
 	case "order_lines":
@@ -36,14 +41,23 @@ switch($request) {
 	case "cage_info":
 		$results = json_encode(getCageInfo($cage));
 		break;
-	case "niin_hierarchy":
-		$results = json_encode(getNiinHierarchy($niin));
-		break;
 	case "niin_info":
 		$results = json_encode(getNiinInfo($niin));
 		break;
-	case "product_info":
-		$results = json_encode(getProductInfoByNiin($niin));
+	case "niin_hierarchy_info":
+		$results = json_encode(getNiinHierarchyInfo($niin));
+		break;
+	case "niin_product_info":
+		$results = json_encode(getNiinProductInfo($niin));
+		break;
+	case "niin_logistics_info":
+		$results = json_encode(getNiinLogisticsInfo($niin));
+		break;
+	case "niin_reference_number":
+		$results = json_encode(getNiinReferenceNumber($niin));
+		break;
+	case "product_property_value_info":
+		$results = json_encode(getNiinProductPropertyValueInfo($value));
 		break;
 	case "label":
 		$results = json_encode(getLabel($uri));
@@ -60,7 +74,18 @@ function getLabel($uri) {
 	return sparqlSelect($query);
 }
 
-function getProductInfoByNiin($niin) {
+function getNiinInfo($niin) {
+	$results = array(
+		'label'     => getLabel($niin),
+		'hierarchy' => getNiinHierarchyInfo($niin),
+		'logistics' => getNiinLogisticsInfo($niin),
+		'ref_num'   => getNiinReferenceNumber($niin),
+		'product'   => getNiinProductInfo($niin)
+	);
+	return $results;
+}
+
+function getNiinProductInfo($niin) {
 	$query .= '';
 	//$query .= getPrefixes();
 	$query .= 'SELECT DISTINCT ?property_label ?property_description (GROUP_CONCAT(DISTINCT ?v ; SEPARATOR=";") AS ?value) WHERE { ';
@@ -73,36 +98,104 @@ function getProductInfoByNiin($niin) {
 	return sparqlSelect($query);
 }
 
-function getNiinInfo($niin) {
+function getNiinProductPropertyValueInfo($value) {
 	$query = '';
 	//$query .= getPrefixes();
-	$query .= "SELECT ?fsc ?inc ?tiic ?pinc ?status_code ?status_code_def ?acquisition_advice_code ?acquisition_advice_code_def ?acquisition_method_code ?acquisition_method_code_def ?acquisition_method_suffix_code ?acquisition_method_suffix_code_def ?criticality_code ?criticality_code_def ?demilitarization_code ?demilitarization_code_def ?hazardous_material_indicator_code ?hazardous_material_indicator_code_def ?item_standardization_code ?item_standardization_code_def ?precious_metal_indicator_code ?precious_metal_indicator_code_def ?administrative_lead_time ?production_lead_time ?assignment_date ?last_demand_date ?unit_price WHERE { ";
+	$query .= "SELECT DISTINCT * WHERE { ";
+	$query .= "<$value> ?property ?value . ";
+	$query .= "FILTER (?property != rdf:type) . ";
+	$query .= "OPTIONAL {?property rdfs:label ?property_label . } ";
+	$query .= "OPTIONAL {?value rdfs:label ?value_label . } ";
+	$query .= "}";
+	return sparqlSelect($query);
+}
+
+/*
+function getNiinLogisticsInfo($niin) {
+	$infoI = getNiinLogisticsInfoI($niin);
+	$infoII = getNiinLogisticsInfoII($niin);
+	$info = array();
+	foreach($infoI[0] as $key => $value) 
+		$info[0][$key] = $value;
+	foreach($infoII[0] as $key => $value)
+		$info[0][$key] = $value;
+	return $info;
+}
+*/
+
+function getNiinLogisticsInfo($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?property ?property_label ?property_comment ?value ?value_label ?value_code ?value_definition WHERE { ";
+	$query .= "<$niin> ?property ?value . ";
+	$query .= "FILTER (?property != log:hasReferenceNumber && ?property != rdfs:label && ?property != rdf:type && ?property != log:hasProductNIIN) . ";
+	$query .= "OPTIONAL {?property rdfs:label ?property_label . } ";
+	$query .= "OPTIONAL {?property rdfs:comment ?property_comment . } ";
+	$query .= "OPTIONAL {?value rdfs:label ?value_label . } ";
+	$query .= "OPTIONAL {?value log:hasCode ?value_code . } ";
+	$query .= "OPTIONAL {?value log:hasDefinition ?value_definition . } ";
+	$query .= "}";
+	return sparqlSelect($query);
+}
+
+function getNiinReferenceNumber($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?ref_num ?cage ?cage_name ?part_number ?rnccrnvc ?rnccrnvc_comment WHERE { ";
+	$query .= "<$niin> log:hasReferenceNumber ?ref_num . ";
+	$query .= "?ref_num log:hasCage ?cage; log:hasPartNumber ?part_number; log:hasRNCCRNVC [log:hasDefinition ?rnccrnvc]. ";
+	$query .= "?cage log:hasCageName ?cage_name . ";
+	$query .= "log:hasRNCCRNVC rdfs:comment ?rnccrnvc_comment . ";
+	$query .= "}";
+	return sparqlSelect($query);
+}
+ 
+
+/*
+function getNiinLogisticsInfoI($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT ?fsc ?inc ?tiic ?pinc ?administrative_lead_time ?production_lead_time ?assignment_date ?last_buy_date ?last_demand_date ?unit_price ?flight_safety_indicator ?cage ?part_number ?rnccrnvc WHERE { ";
 	$query .= "<$niin> rdfs:label ?label . ";
 	$query .= "OPTIONAL { <$niin> log:hasFSC [rdfs:label ?fsc] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasINC [rdfs:label ?inc] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasTiic ?tiic . } ";
 	$query .= "OPTIONAL { <$niin> log:hasPinc ?pinc . } ";
+	$query .= "OPTIONAL { <$niin> log:hasAdministrativeLeadTime ?administrative_lead_time . } ";
+	$query .= "OPTIONAL { <$niin> log:hasProductionLeadTime ?production_lead_time . } ";
+	$query .= "OPTIONAL { <$niin> log:assignmentDate ?assignment_date . } ";
+	$query .= "OPTIONAL { <$niin> log:hasLastBuyDate ?last_buy_date . } ";
+	$query .= "OPTIONAL { <$niin> log:hasLastDemandDate ?last_demand_date . } ";
+	$query .= "OPTIONAL { <$niin> log:hasProfitCenter ?profit_center . } ";
+	$query .= "OPTIONAL { <$niin> log:hasSupplyChain ?supply_chain . } ";
+	$query .= "OPTIONAL { <$niin> log:hasUnitPrice ?unit_price . } ";
+	$query .= "OPTIONAL { <$niin> log:hasFlightSafetyIndicator ?flight_safety_indicator . } ";
+	$query .= "OPTIONAL { <$niin> log:hasReferenceNumber [log:hasCage [log:hasCageName ?cage]; log:hasPartNumber ?part_number; log:hasRNCCRNVC [log:hasDefinition ?rnccrnvc]]. } ";
+	$query .= "}";
+	return sparqlSelect($query);
+}
+
+function getNiinLogisticsInfoII($niin) {
+	$query = '';
+	//$query .= getPrefixes();
+	$query .= "SELECT DISTINCT ?status_code ?status_code_def ?acquisition_advice_code ?acquisition_advice_code_def ?acquisition_method_code ?acquisition_method_code_def ?acquisition_method_suffix_code ?acquisition_method_suffix_code_def ?criticality_code ?criticality_code_def ?demilitarization_code ?demilitarization_code_def ?electrostatic_discharge_code ?electrostatic_discharge_code_def ?hazardous_material_indicator_code ?hazardous_material_indicator_code_def ?item_standardization_code ?item_standardization_code_def ?precious_metal_indicator_code ?precious_metal_indicator_code_def WHERE { ";
+	$query .= "<$niin> rdfs:label ?label . ";
 	$query .= "OPTIONAL { <$niin> log:hasStatusCode [log:hasCode ?status_code; log:hasDefinition ?status_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasAcquisitionAdviceCode [log:hasCode ?acquisition_advice_code; log:hasDefinition ?acquisition_advice_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasAcquisitionMethodCode [log:hasCode ?acquisition_method_code; log:hasDefinition ?acquisition_method_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasAcquisitionMethodSuffixCode [log:hasCode ?acquisition_method_suffix_code; log:hasDefinition ?acquisition_method_suffix_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasCriticalityCode [log:hasCode ?criticality_code; log:hasDefinition ?criticality_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasDemilitarizationCode [log:hasCode ?demilitarization_code; log:hasDefinition ?demilitarization_code_def] . } ";
+	$query .= "OPTIONAL { <$niin> log:hasElectrostaticDischargeCode [log:hasCode ?electrostatic_discharge_code; log:hasDefinition ?electrostatic_discharge_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasHazardousMaterialIndicatorCode [log:hasCode ?hazardous_material_indicator_code; log:hasDefinition ?hazardous_material_indicator_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasItemStandardizationCode [log:hasCode ?item_standardization_code; log:hasDefinition ?item_standardization_code_def] . } ";
 	$query .= "OPTIONAL { <$niin> log:hasPreciousMetalIndicatorCode [log:hasCode ?precious_metal_indicator_code; log:hasDefinition ?precious_metal_indicator_code_def] . } ";
-	$query .= "OPTIONAL { <$niin> log:hasAdministrativeLeadTime ?administrative_lead_time . } ";
-	$query .= "OPTIONAL { <$niin> log:hasProductionLeadTime ?production_lead_time . } ";
-	$query .= "OPTIONAL { <$niin> log:assignmentDate ?assignment_date . } ";
-	$query .= "OPTIONAL { <$niin> log:hasLastDemandDate ?last_demand_date . } ";
-	$query .= "OPTIONAL { <$niin> log:hasProfitCenter ?profit_center . } ";
-	$query .= "OPTIONAL { <$niin> log:hasSupplyChain ?supply_chain . } ";
-	$query .= "OPTIONAL { <$niin> log:hasUnitPrice ?unit_price . } ";
 	$query .= "}";
 	return sparqlSelect($query);
 }
+*/
 
-function getNiinHierarchy($niin) {
+function getNiinHierarchyInfo($niin) {
 	$query = '';
 	//$query .= getPrefixes();
 	$query .= "SELECT DISTINCT ?parent WHERE { ";
@@ -152,6 +245,7 @@ function getOrderLinesByProcurement($procurement) {
 
 
 function sparqlSelect($query) {
+	//echo $query;
 	$endpoint = "http://api.xsb.com/sparql/query";
 	$options = array(
 		CURLOPT_FOLLOWLOCATION => true,

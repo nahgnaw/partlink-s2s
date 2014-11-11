@@ -119,7 +119,21 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree = function(tree, ro
 				var item = tree[i];
 				var expandCollapsePlus = "http://partlink.tw.rpi.edu/ui/images/collapsed.png";
 				var expandCollapseMinus = "http://partlink.tw.rpi.edu/ui/images/expanded.png";
-				var li = jQuery("<li><table><tr><td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer;width:12px\" class=\"more-icon\" src=\""+expandCollapsePlus+"\"/><img style=\"cursor:pointer;width:12px\" class=\"less-icon\" src=\""+expandCollapseMinus+"\"/></td><td><span style=\"cursor:pointer\" title=\""+item['label']+" ("+item['count']+" )\"> " + item['label'] + " (" + item['count'] + ") </span></td></tr></table></li>");
+				var li = jQuery("<li></li>");
+				var table = jQuery("<table></table>");
+				var tr = jQuery("<tr></tr>").append("<td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer;width:12px\" class=\"more-icon\" src=\"" + expandCollapsePlus + "\"/><img style=\"cursor:pointer;width:12px\" class=\"less-icon\" src=\" "+ expandCollapseMinus + "\"/></td>");
+				var td = jQuery("<td><span style=\"cursor:pointer\"></span></td>");
+				if (typeof item['count'] != 'undefined') {
+					td.find('span').attr('title', item['label'] + " (" + item['count'] + ")");
+					td.find('span').html(item['label'] + " (" + item['count'] + ")");
+				}
+				else {
+					td.find('span').attr('title', item['label']);
+					td.find('span').html(item['label']);
+				}
+				tr.append(td);
+				table.append(tr);
+				li.append(table);
 				var subtree = edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree(tree,item['id']);
 				li.find(".more-icon").hide();
 				li.find(".less-icon").hide();
@@ -133,7 +147,7 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree = function(tree, ro
 				else {
 					jQuery(li).addClass("leaf");
 					jQuery(li).css({
-						"padding-left": "6px"
+						"padding-left": "12px"
 					});
 				}
 				jQuery(list).append(li);

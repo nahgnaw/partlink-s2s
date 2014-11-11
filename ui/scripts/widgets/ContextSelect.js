@@ -49,11 +49,11 @@ edu.rpi.tw.sesf.s2s.widgets.ContextSelect.prototype.reset = function() {
 edu.rpi.tw.sesf.s2s.widgets.ContextSelect.prototype.update = function(data) {
 	this.selectbox.children().remove();
 	var data = JSON.parse(data);
-	/*
+	
 	data.sort(function(o1, o2) {
 	    return (o1.label <= o2.label) ? -1 : 1;
 	});
-	*/
+	
 	for (var i = 0; i < data.length; ++i) {
 	    var item = data[i];
 		var infoButtonImg = "http://aquarius.tw.rpi.edu/s2s/2.0/ui/images/icon_info_gray.gif";
