@@ -53,7 +53,13 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		);
 				
 		$encoded_query = 'query=' . urlencode($query) . '&output=' . urlencode('application/xml');
-		return execSelect($this->getEndpoint(), $encoded_query, $options);
+		$cacheKey = md5(serialize($encoded_query));
+		$result = apc_fetch($cacheKey);
+		if ($result == null) {	
+			$result = execSelect($this->getEndpoint(), $encoded_query, $options);
+			apc_store($cacheKey, $result);
+		}
+		return $result;
 	}
 
 	private function getPartClassesByParent($parent) {
@@ -64,13 +70,7 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		$query .= "?id rdfs:subClassOf ?parent . ";
 		$query .= "FILTER (!isBlank(?parent)) . ";
 		$query .= "BIND(str(?l) AS ?label) . } ";
-
-		$cacheKey = md5($parent . '_SUBCLASSES');
-		$result = apc_fetch($cacheKey);
-		if ($result == null) {	
-			$result = $this->sparqlSelect($query);
-			apc_store($cacheKey, $result);
-		}
+		$result = $this->sparqlSelect($query);
 		return $result;
 	}
 	
@@ -80,22 +80,15 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		return $this->sparqlSelect($query);
 	}
 
-
 	/**
 	* Return count of total search results for specified constraints
 	* @param array $constraints array of arrays with search constraints
 	* @result int search result count
 	*/
 	public function getSearchResultCount(array $constraints) {
-		$cacheKey = md5(serialize($constraints));
-		$result = apc_fetch($cacheKey);
-		if ($result == null) {	
-			$query = $this->getSelectQuery("count", $constraints);
-			$results = $this->sparqlSelect($query);
-			$result = $results[0]['count'];
-			apc_add($cacheKey, $result);
-		}
-		return $result;
+		$query = $this->getSelectQuery("count", $constraints);
+		$results = $this->sparqlSelect($query);
+		return $results[0]['count'];
 	}
 
 	public function getPartClassFacetOutput(array &$results) {

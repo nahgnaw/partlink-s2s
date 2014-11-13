@@ -75,3 +75,7 @@ img.info {
 	cursor: pointer;
 	vertical-align: -30%;
 }
+
+.tooltip {
+	cursor: pointer;
+}
