@@ -1,3 +1,7 @@
+h1 {
+	font-size: 1.6em;
+}
+
 a:link, a:visited {
 	color: #ce272e;
 	text-decoration: none;
@@ -28,6 +32,7 @@ a:link, a:visited {
 .widget-panel .result-list-item {
 	padding-bottom: 6px;
 	padding-top: 5px;
+	font-size: 1.1em;
 }
 
 .widget-panel .result-list-item .title {
@@ -59,4 +64,14 @@ div.olControlAttribution {
 
 div.olControlMousePosition {
 	left: 3px;
+}
+
+.widget-panel button {
+	margin-left: 8px;
+}
+
+img.info {
+	width: 14px;
+	cursor: pointer;
+	vertical-align: -30%;
 }

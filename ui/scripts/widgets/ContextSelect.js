@@ -12,9 +12,10 @@ edu.rpi.tw.sesf.s2s.widgets.ContextSelect = function(panel) {
 	this.panel = panel;
 	var freetext = jQuery("<input type=\"text\"></input>");
     jQuery(freetext).autocomplete({source: edu.rpi.tw.sesf.s2s.widgets.ContextSelect.autocompleteSource , select: edu.rpi.tw.sesf.s2s.widgets.ContextSelect.autocompleteSelect });
+	var clearButton = jQuery("<button>Clear</button>");
 	this.selectbox = jQuery("<div style=\"height:12em;border: 1px solid gray;overflow: auto;\"></div>");
 	this.div = jQuery("<div></div>");
-	this.div.append(freetext).append(this.selectbox);
+	this.div.append(freetext).append(clearButton).append(this.selectbox);
 }
 
 edu.rpi.tw.sesf.s2s.widgets.ContextSelect.prototype.updateState = function(input)
@@ -51,25 +52,25 @@ edu.rpi.tw.sesf.s2s.widgets.ContextSelect.prototype.update = function(data) {
 	var data = JSON.parse(data);
 	
 	data.sort(function(o1, o2) {
-	    return (o1.label <= o2.label) ? -1 : 1;
+		return (o1.label <= o2.label) ? -1 : 1;
 	});
 	
 	for (var i = 0; i < data.length; ++i) {
-	    var item = data[i];
-		var infoButtonImg = "http://aquarius.tw.rpi.edu/s2s/2.0/ui/images/icon_info_gray.gif";
-	    var label = (item['count'] != null) ? item['label'] + " (" + item['count'] + ") " : item['label'];
-	    var input;
-	    if (item['context'] != null) {
-	    	var input = jQuery("<span width=\"100%\" class=\"x-option\"><input type=\"hidden\" value=\"" + item['id'] + "\" /><span title=\""+label+"\"class=\"x-option-label\" style=\"overflow:hidden\">" + label + "</span><a target=\"_blank_\" href=\"" + item['context'] + "\"><img style=\"height:2ex;vertical-align:text-top\" src=\"" + infoButtonImg + "\"></a></span>");
-	    }
-	    else {
-	    	var input = jQuery("<span width=\"100%\" class=\"x-option\"><input type=\"hidden\" value=\"" + item['id'] + "\" /><span title=\""+label+"\"class=\"x-option-label\" style=\"overflow:hidden\">" + label + "</span>");
-	    }
-	    var self = this;
+		var item = data[i];
+		var infoButtonImg = "http://partlink.tw.rpi.edu/ui/images/info-icon.png";
+		var label = (item['count'] != null) ? item['label'] + " (" + item['count'] + ") " : item['label'];
+	    	var input;
+	    	if (item['context'] != null) {
+	    		var input = jQuery("<span width=\"100%\" class=\"x-option\"><input type=\"hidden\" value=\"" + item['id'] + "\" /><span title=\""+label+"\"class=\"x-option-label\" style=\"overflow:hidden\">" + label + "</span><a target=\"_blank_\" href=\"" + item['context'] + "\"><img style=\"height:2ex;vertical-align:text-top\" src=\"" + infoButtonImg + "\"></a></span>");
+	    	}
+	    	else {
+	    		var input = jQuery("<span width=\"100%\" class=\"x-option\"><input type=\"hidden\" value=\"" + item['id'] + "\" /><span title=\""+label+"\"class=\"x-option-label\" style=\"overflow:hidden\">" + label + "</span>");
+	    	}
+	    	var self = this;
 		jQuery(input).find(".x-option-label").click(function() {
 		    self.updateData(this);
 		});
-	    this.selectbox.append(jQuery("<div style=\"padding-right:1em;padding-left:1em\"></div>").append(input));
+	    	this.selectbox.append(jQuery("<div style=\"padding-right:1em;padding-left:1em\"></div>").append(input));
 	}
 	var input = this.panel.getInput().getId();
 	var self = this;

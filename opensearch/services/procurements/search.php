@@ -17,12 +17,24 @@ $offset = 0;
 // array for input constraints
 $constraints = array(); // array for input constraints
 
+if (@$_GET['order_numbers'] && @$_GET['order_numbers'] != '') {
+    $constraints['order_numbers'] = explode(";",$_GET['order_numbers']);
+}
+
 if (@$_GET['contract_numbers'] && @$_GET['contract_numbers'] != '') {
     $constraints['contract_numbers'] = explode(";",$_GET['contract_numbers']);
 }
 
+if (@$_GET['niins'] && @$_GET['niins'] != '') {
+    $constraints['niins'] = explode(";",$_GET['niins']);
+}
+
 if (@$_GET['part_classes'] && @$_GET['part_classes'] != '') {
     $constraints['part_classes'] = explode(";",$_GET['part_classes']);
+}
+
+if (@$_GET['cage_countries'] && @$_GET['cage_countries'] != '') {
+    $constraints['cage_countries'] = explode(";",$_GET['cage_countries']);
 }
 
 if (@$_GET['net_prices'] && @$_GET['net_prices'] != '') {

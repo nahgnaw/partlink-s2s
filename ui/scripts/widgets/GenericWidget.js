@@ -15,16 +15,20 @@ edu.rpi.tw.sesf.s2s.widgets.GenericWidget = function(panel) {
 	this.panel = panel;
 	var i = panel.getInput();
 	var input = jQuery("<input type=\"text\"></input>");
+	var searchButton = jQuery("<button>Search</button>");
+	var clearButton = jQuery("<button>Clear</button>");
 	this.div =  jQuery("<div class=\"facet-content\"></div>");
 	panel.setInputData(i.getId(), function() {
 		return jQuery(input).val();
 	});
 	var self = this;
-    jQuery(input).change(function() {
+   	jQuery(input).change(function() {
 		self.updateState();
 		panel.notify();
-    });
-	jQuery(this.div).append(input);
+    	});
+    	jQuery(this.div).append(input).append(searchButton).append(clearButton);
+    	searchButton.click(function() {input.change();});
+    	clearButton.click(function() {input.val("").change();});
 }
 
 edu.rpi.tw.sesf.s2s.widgets.GenericWidget.prototype.updateState = function(clicked)

@@ -38,6 +38,18 @@
     rdfs:comment "A search parameter for free-text keyword search on the contract number."^^xsd:string ;
     rdfs:label "Contract Number"^^xsd:string .
 
+:OrderNumbers
+    core:hasDelimiter ";"^^xsd:string ;
+    a s2s:Input, owl:Thing ;
+    rdfs:comment "A search parameter for free-text keyword search on the order number."^^xsd:string ;
+    rdfs:label "Order Number"^^xsd:string .
+
+:NIINs
+    core:hasDelimiter ";"^^xsd:string ;
+    a s2s:Input, owl:Thing ;
+    rdfs:comment "A search parameter for free-text keyword search on the NIIN."^^xsd:string ;
+    rdfs:label "NIIN"^^xsd:string .
+
 :PartClasses
     core:hasDelimiter ";"^^xsd:string ;
     a s2s:Input, owl:Thing ;
@@ -46,6 +58,17 @@
 
 :PartClassesQuery
     s2s:forInput :PartClasses ;
+    s2s:hasOutput core:LabelIdContextCountParentJsonArray ;
+    a s2s:InputValuesInterface, owl:Thing .
+
+:CageCountries
+    core:hasDelimiter ";"^^xsd:string ;
+    a s2s:Input, owl:Thing ;
+    rdfs:comment "A search parameter for data related to any selected CAGE country."^^xsd:string ;
+    rdfs:label "CAGE Countries"^^xsd:string .
+
+:CageCountriesQuery
+    s2s:forInput :CageCountries ;
     s2s:hasOutput core:LabelIdContextCountParentJsonArray ;
     a s2s:InputValuesInterface, owl:Thing .
 
@@ -155,29 +178,6 @@ core:MinMaxJsonArray
     a s2s:Output ;
     rdfs:comment "An s2s:Output for a JSON array containing JSON objects with at least two members, \"min\" and \"max\"."^^xsd:string .
 
-:WmsOpenLayersBoundingBox
-    core:hasJavaScriptPrototype "edu.rpi.tw.sesf.s2s.widgets.WmsOpenLayersBoundingBox"^^xsd:string ;
-    core:requiresJavaScript "http://data.deepcarbon.net/dco-s2s/ui/scripts/widgets/WmsOpenLayersBbox.js"^^xsd:anyURI, "http://openlayers.org/api/OpenLayers.js"^^xsd:anyURI ;
-    s2s:supportsInput geo:box ;
-    s2s:supportsOutput core:WmsUrl ;
-    a core:JavaScriptWidget, s2s:InputWidget ;
-    rdfs:comment "A s2s:InputWidget for selecting the geo:box parameter and using a dynamic WMS response to provide map context."^^xsd:string ;
-    rdfs:label "WMS Open Layers Bounding Box"^^xsd:string . 
-
-:ResultsMapQuery
-    s2s:hasOutput core:TextHtml ;
-    a s2s:SearchResultsInterface ;
-    rdfs:comment "A s2s:SearchResultsInterface that returns a map of results as HTML."^^xsd:string ;
-    rdfs:label "Get Results Map"^^xsd:string .
-
-:ResultsMapWidget
-    core:hasJavaScriptPrototype "edu.rpi.tw.sesf.s2s.widgets.ResultsMapWidget"^^xsd:string ;
-    core:requiresJavaScript "http://partlink.tw.rpi.edu/ui/scripts/widgets/ResultsArcGISMapWidget.js"^^xsd:anyURI ;
-    s2s:supportsOutput core:TextHtml ;
-    a s2s:ResultsWidget ;
-    rdfs:comment "A s2s:ResultsWidget for results that accepts XHTML content."^^xsd:string ;
-    rdfs:label "Results Map Widget"^^xsd:string . 
-
 :ContextSelect
     core:hasJavaScriptPrototype "edu.rpi.tw.sesf.s2s.widgets.ContextSelect"^^xsd:string ;
     core:requiresJavaScript "http://partlink.tw.rpi.edu/ui/scripts/widgets/ContextSelect.js"^^xsd:anyURI ;
@@ -195,4 +195,12 @@ core:MinMaxJsonArray
     a core:JavaScriptWidget, s2s:InputWidget ;
     rdfs:comment "A s2s:InputWidget that uses an XHTML tree of input elements and provides a count of results for each options."^^xsd:string ;
     rdfs:label "Hierarchy Faceted Widget"^^xsd:string ;
+    owl:versionInfo "4.0"^^xsd:string .
+
+:GenericWidget
+    core:hasJavaScriptPrototype "edu.rpi.tw.sesf.s2s.widgets.GenericWidget"^^xsd:string ;
+    core:requiresJavaScript "http://partlink.tw.rpi.edu/ui/scripts/widgets/GenericWidget.js"^^xsd:anyURI ;
+    a :JavaScriptWidget, s2s:InputWidget ;
+    rdfs:comment "A generic s2s:InputWidget that supports any s2s:Input."^^xsd:string ;
+    rdfs:label "Generic Widget"^^xsd:string ;
     owl:versionInfo "4.0"^^xsd:string .

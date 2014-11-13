@@ -12,7 +12,6 @@ if (edu.rpi.tw.sesf.s2s.widgets == undefined || typeof(edu.rpi.tw.sesf.s2s.widge
  * Construct from Widget object
  */
 edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget = function(panel) {
-	this.queryServiceUrlPrefix = "http://partlink.tw.rpi.edu/opensearch/services/query.php?request=";
 	this.panel = panel;
 	this.div = jQuery("<div style=\"display:inline\"><div style=\"float:right;\" class=\"paging-panel\"></div><br/><div style=\"margin-top:3px\" class=\"html\"><span>Loading...</span></div></div>");
 	var offsetInput = edu.rpi.tw.sesf.s2s.utils.offsetInput;
@@ -64,6 +63,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.reset = function()
 
 edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 {
+	var queryServiceUrlPrefix = "http://partlink.tw.rpi.edu/opensearch/services/query.php?request=";
 	jQuery(this.div).find(".html").children().remove();
 	jQuery(this.div).find(".page").children().remove();
 	jQuery(this.div).find(".html").append(data);
@@ -76,7 +76,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 		if (jQuery(this).find(".expander-action").text() == "expand") {
 			jQuery(this).find(".expander-action").html("collape");
 			var style = {
-				"background-position": "25% 60%",
+				"background-position": "31% 50%",
         			"background-repeat": "no-repeat",
 				"background-size": "12px 12px",
         			"background-image": "url(images/expanded.png)"
@@ -87,7 +87,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 			content.append("<span>Loading...</span>");	
 			var uri = jQuery(this).parent().parent().attr('id');
 			jQuery.ajax({
-				url: self.queryServiceUrlPrefix + "order_lines&procurement=" + encodeURIComponent(uri)
+				url: queryServiceUrlPrefix + "order_lines&input=" + encodeURIComponent(uri)
 			}).done(function(data) {
 				data = jQuery.parseJSON(data);
 				content.children().remove();
@@ -100,28 +100,31 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 				});
 				var cageData = {uri: data[0]['cage']};
 				jQuery.ajax({
-					url: self.queryServiceUrlPrefix + "cage_info&cage=" + encodeURIComponent(cageData.uri)
+					url: queryServiceUrlPrefix + "cage_info&input=" + encodeURIComponent(cageData.uri)
 				}).done(function(d){
 					d = jQuery.parseJSON(d);
 					jQuery.each(d[0], function(key, value) {
 						cageData[key] = value;
 					});
 					var mapDiv = content.find(".cage-map")[0];
+					jQuery(mapDiv).tooltip();
 					self.initializeMap(mapDiv, cageData);
 				});
 				jQuery("span.niin").click(function() {
 					var niin = this.id;
 					jQuery.ajax({
-						url: self.queryServiceUrlPrefix + "niin_info&niin=" + encodeURIComponent(niin)
+						url: queryServiceUrlPrefix + "niin_info&input=" + encodeURIComponent(niin)
 					}).done(function(data) {
 						data = jQuery.parseJSON(data);
 						var dialog = jQuery("<div class=\"niin-info-dialog\" title=\"NIIN: " + data['label'][0]['label'] + "\"></div>");
 						dialog.tooltip();
+						/*
 						if (data.hierarchy.length > 0) {
 							var div = jQuery("<div class=\"niin-info-hierarchy\"></div>");
 							div.append("<p style=\"font-weight:bold\">NIIN Hierarchy</p>");
 							dialog.append(div);
 						}
+						*/
 						if (data.logistics.length > 0) {
 							var logistics = data['logistics'];
 							var table = jQuery("<table class=\"niin-info-logistics\"></table>");
@@ -130,9 +133,9 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 								var tr = jQuery("<tr></tr>");
 								var tdProperty = jQuery("<td class=\"tooltip\" style=\"width:50%\"></td>");
 								if (typeof item['property_label'] != 'undefined')
-									tdProperty.html(item['property_label']);
+									tdProperty.html(item['property_label'] + ": ");
 								else 
-									tdProperty.html(item['property'].split('#')[1].split(/(?=[A-Z])/).join(' '));
+									tdProperty.html(item['property'].split('#')[1].split(/(?=[A-Z])/).join(' ') + ": ");
 								if (typeof item['property_comment'] != 'undefined')
 									tdProperty.attr('title', item['property_comment']);
 								var tdValue = jQuery("<td class=\"tooltip\"></td>");
@@ -156,9 +159,9 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 							jQuery.each(refNum, function(i, item) {
 								var table = jQuery("<table class=\"niin-info-ref-num\"></table>");
 								table.append("<tr><td colspan=\"2\" style=\"font-style:italic\">" + decodeURIComponent(item['ref_num'].split('#')[1]) + "</td></tr>");
-								var trCage = jQuery("<tr><td style=\"width:15%\">CAGE</td><td id=\"" + item['cage'] + "\">" + item['cage_name'] + "</td></tr>");
-								var trPartNum = jQuery("<tr><td>Part Number</td><td>" + item['part_number'] + "</td></tr>");
-								var trRnccrnvc = jQuery("<tr><td class=\"tooltip\" title=\"" + item['rnccrnvc_comment'] + "\">RNCCRNVC</td><td>" + item['rnccrnvc'] + "</td></tr>");
+								var trCage = jQuery("<tr><td style=\"width:15%\">CAGE: </td><td id=\"" + item['cage'] + "\">" + item['cage_name'] + "</td></tr>");
+								var trPartNum = jQuery("<tr><td>Part Number: </td><td>" + item['part_number'] + "</td></tr>");
+								var trRnccrnvc = jQuery("<tr><td class=\"tooltip\" title=\"" + item['rnccrnvc_comment'] + "\">RNCCRNVC: </td><td>" + item['rnccrnvc'] + "</td></tr>");
 								table.append(trCage).append(trPartNum).append(trRnccrnvc);
 								div.append(table);
 								
@@ -171,13 +174,19 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 							table.append("<tr><th colspan=\"2\">NIIN Part Properties</th></tr>");
 							jQuery.each(product, function(i, item) {
 								var tr = jQuery("<tr></tr>");
-								var tdProperty = jQuery("<td class=\"tooltip\" title=\"" + item['property_description'] + "\">" + item['property_label'] + "</td>"); 
+								var tdProperty = jQuery("<td class=\"tooltip\"></td>");
+								if (typeof item['property_label'] != 'undefined')
+									tdProperty.html(item['property_label'] + ": ");
+								else
+									tdProperty.html(item['property'] + ": ");
+								if (typeof item['property_description'] != 'undefined')
+									tdProperty.attr('title', item['property_description']); 
 								var tdValue = jQuery("<td></td>");
 								var values = item['value'].split(';');
 								jQuery.each(values, function(j, value) {
-									var p = jQuery("<p></p>");
+									var p = jQuery("<p>* </p>");
 									jQuery.ajax({
-										url: self.queryServiceUrlPrefix + "product_property_value_info&value=" + encodeURIComponent(value)
+										url: queryServiceUrlPrefix + "product_property_value_info&input=" + encodeURIComponent(value)
 									}).done(function(data) {
 										data = jQuery.parseJSON(data);
 										jQuery.each(data, function(i, d) {
@@ -218,7 +227,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 		else {
 			jQuery(this).find(".expander-action").html("expand");
 			var style = {
-				"background-position": "25% 60%",
+				"background-position": "31% 50%",
         			"background-repeat": "no-repeat",
 				"background-size": "12px 12px",
         			"background-image": "url(images/collapsed.png)"
@@ -359,7 +368,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.initializeMap = function
 		if (status == google.maps.GeocoderStatus.OK) {
 			var resultLatLng = results[0].geometry.location;
 			var mapOptions = {
-				center: ({lat: resultLatLng.lat() + 0.2, lng: resultLatLng.lng()}),
+				center: ({lat: resultLatLng.lat() + 0.26, lng: resultLatLng.lng()}),
 				zoom: 9 
 			};
 			var map = new google.maps.Map(div, mapOptions);
@@ -369,15 +378,21 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.initializeMap = function
 			});			
 			var infoWindowContent = "<div class=\"cage-map-info-window-content\"><span>Name: </span>" + data['name'];
 			if (typeof data['code'] != 'undefined')
-				infoWindowContent += "<br /><span>Code: </span>" + data['code'];
+				infoWindowContent += "<br /><span class=\"tooltip\" title=\"Five-character CAGE code\">Code: </span>" + data['code'];
 			if (typeof data['status'] != 'undefined')
-				infoWindowContent += "<br /><span>Status: </span>" + data['status'].split('_')[1];
+				infoWindowContent += "<br /><span class=\"tooltip\" title=\"Used to indicate cage status code for CAGE\">Status: </span>" + data['status'].split('_')[1];
+			if (typeof data['business_type_code'] != 'undefined')
+				infoWindowContent += "<br /><span class=\"tooltip\">Business Type Code: </span>" + data['business_type_code'].split('_')[1];
+			if (typeof data['business_size_code'] != 'undefined')
+				infoWindowContent += "<br /><span class=\"tooltip\">Business Size Code: </span>" + data['business_size_code'].split('_')[1];
+			if (typeof data['primary_business_code'] != 'undefined')
+				infoWindowContent += "<br /><span class=\"tooltip\">Primary Business Code: </span>" + data['primary_business_code'].split('_')[1];
 			if (typeof data['cao'] != 'undefined')
-				infoWindowContent += "<br /><span>CAO: </span>" + data['cao'];
+				infoWindowContent += "<br /><span class=\"tooltip\" title=\"Contract Activity Office\">CAO: </span>" + data['cao'];
 			if (typeof data['adp'] != 'undefined')
-				infoWindowContent += "<br /><span>ADP: </span>" + data['adp']; 
+				infoWindowContent += "<br /><span class=\"tooltip\" title=\"Automated Data Processing\">ADP: </span>" + data['adp']; 
 			if (typeof data['duns'] != 'undefined')
-				infoWindowContent += "<br /><span>DUNS Num: </span>" + data['duns'];
+				infoWindowContent += "<br /><span class=\"tooltip\" title=\"A unique, non-indicative 9-digit identifier issued and maintained by Dunn and Bradstreet (D&B) that verifies the existence of a business entity globally.\">DUNS Num: </span>" + data['duns'];
 			if (typeof data['woman_owned'] != 'undefined')
 				infoWindowContent += "<br /><span>Is Woman Owned: </span>" + data['woman_owned'];
 			if (typeof data['street_address'] != 'undefined') {

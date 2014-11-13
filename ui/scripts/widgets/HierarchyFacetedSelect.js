@@ -57,7 +57,8 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.prototype.update = function(d
 	this.selectbox.find("span").click(function() {
 		self.updateClick(this);
         });
-	this.selectbox.find("img").click(edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.expandCollapse);
+	this.selectbox.find("img.trigger").click(edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.expandCollapse);
+	this.selectbox.find("img.info").click(edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.showDialog);
 }
 
 edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.prototype.updateClick = function(elem)
@@ -121,7 +122,7 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree = function(tree, ro
 				var expandCollapseMinus = "http://partlink.tw.rpi.edu/ui/images/expanded.png";
 				var li = jQuery("<li></li>");
 				var table = jQuery("<table></table>");
-				var tr = jQuery("<tr></tr>").append("<td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer;width:12px\" class=\"more-icon\" src=\"" + expandCollapsePlus + "\"/><img style=\"cursor:pointer;width:12px\" class=\"less-icon\" src=\" "+ expandCollapseMinus + "\"/></td>");
+				var tr = jQuery("<tr></tr>").append("<td><input type=\"hidden\" value=\"" + item['id'] + "\" /><img style=\"cursor:pointer;width:12px\" class=\"more-icon trigger\" src=\"" + expandCollapsePlus + "\"/><img style=\"cursor:pointer;width:12px\" class=\"less-icon trigger\" src=\" "+ expandCollapseMinus + "\"/></td>");
 				var td = jQuery("<td><span style=\"cursor:pointer\"></span></td>");
 				if (typeof item['count'] != 'undefined') {
 					td.find('span').attr('title', item['label'] + " (" + item['count'] + ")");
@@ -130,9 +131,7 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree = function(tree, ro
 				else {
 					td.find('span').attr('title', item['label']);
 					td.find('span').html(item['label']);
-				}
-				tr.append(td);
-				table.append(tr);
+				} tr.append(td).append("<td><img class=\"info\" id=\"" + item['id'] + "\" src=\"http://partlink.tw.rpi.edu/ui/images/info-icon.png\"/></td>"); table.append(tr);
 				li.append(table);
 				var subtree = edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.buildTree(tree,item['id']);
 				li.find(".more-icon").hide();
@@ -169,4 +168,66 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.expandCollapse = function(eve
 		jQuery(jQuery(obj).find(".less-icon")[0]).show(); jQuery(jQuery(obj).find(".more-icon")[0]).hide();
     	}
     	eventObject.stopPropagation();
+}
+
+edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.showDialog = function(eventObject)
+{
+	var queryServiceUrlPrefix = "http://partlink.tw.rpi.edu/opensearch/services/query.php?request=";
+	var uri = eventObject.target.id;
+	jQuery.ajax({
+		url: queryServiceUrlPrefix + "part_class_info&input=" + encodeURIComponent(uri)
+	}).done(function(data) {
+		data = jQuery.parseJSON(data)[0];
+		var dialog = jQuery("<div class=\"part-class-info-dialog\" title=\"" + data['label'] + "\"></div>");
+		dialog.tooltip();
+		var table = jQuery("<table class=\"part-class-info-table\"></table>");
+		table.append("<tr><td>URI: </td><td>" + uri + "</td></tr>");
+		table.append("<tr><td>Label: </td><td>" + data['label'] + "</td></tr>");
+		if (typeof data['description'] != 'undefined')
+			table.append("<tr><td>Description: </td><td>" + data['description'] + "</td></tr>");
+		if (typeof data['native_id'] != 'undefined')
+			table.append("<tr><td>Native ID: </td><td>" + data['native_id'] + "</td></tr>");
+		if (typeof data['inc'] != 'undefined')
+			table.append("<tr><td class=\"tooltip\" title=\"Refers to 5-character item name code.\">INC: </td><td>" + data['inc'] + "</td></tr>");
+		jQuery.ajax({
+			url: queryServiceUrlPrefix + "part_class_properties&input=" + encodeURIComponent(uri)
+		}).done(function(d) {
+			d = jQuery.parseJSON(d);
+			if (typeof d != 'undefined') {
+				jQuery.each(d, function(i, item) {
+					var tr = jQuery("<tr></tr>");
+					var tdProperty = jQuery("<td></td>");
+					if (typeof item['property_label'] != 'undefined')
+						tdProperty.html(item['property_label'] + ": ");
+					else
+						tdProperty.html(item['property'] + ": ");
+					if (typeof item['property_description'] != 'undefined') {
+						tdProperty.attr('class', 'tooltip'); 
+						tdProperty.attr('title', item['property_description']);
+					}
+					var tdValue = jQuery("<td></td>");
+					if (typeof item['value_label'] != 'undefined')
+						tdValue.html(item['value_label']);
+					else
+						tdValue.html(item['value']);
+					tr.append(tdProperty).append(tdValue);
+					table.append(tr);
+				});
+				dialog.append(table);
+			}
+			else 
+				dialog.append(table);
+		});
+		jQuery(dialog).dialog({
+        	        width: 600,
+                	show: {
+                        	effect: "blind",
+                                duration: 200
+                        },
+                        hide: {
+                                effect: "blind",
+                                duration: 200
+                        }
+                });
+	}); 
 }

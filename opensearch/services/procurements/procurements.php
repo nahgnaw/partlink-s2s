@@ -46,7 +46,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return array an array of associative arrays containing the bindings of the query results
 	*/
 	public function sparqlSelect($query) {
-	
 		$options = array(
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_CONNECTTIMEOUT => 5,
@@ -58,7 +57,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	}
 
 	private function getPartClassesByParent($parent) {
-	
 		//$query = $this->getPrefixes();
 		$query = "SELECT DISTINCT ?id ?label ?parent WHERE { ";
 		$query .= "?id rdfs:subClassOf+ <$parent> . ";
@@ -75,17 +73,13 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		}
 		return $result;
 	}
-
-	private function getProcurementCountByConstraint($constraint, $query) {
-		
-		$cacheKey = md5($constraint . '_COUNT');
-		$result = apc_fetch($cacheKey);
-		if ($result == null) {	
-			$result = $this->sparqlSelect($query);
-			apc_store($cacheKey, $result);
-		}
-		return $result;
+	
+	private function getOrderLineCountByProcurement($procurement) {
+		$query = "SELECT (COUNT(DISTINCT ?order_line) AS ?count) WHERE { ";
+		$query .= "<$procurement> log:hasPurchaseOrderLineNum ?order_line . } ";
+		return $this->sparqlSelect($query);
 	}
+
 
 	/**
 	* Return count of total search results for specified constraints
@@ -93,7 +87,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @result int search result count
 	*/
 	public function getSearchResultCount(array $constraints) {
-	
 		$cacheKey = md5(serialize($constraints));
 		$result = apc_fetch($cacheKey);
 		if ($result == null) {	
@@ -106,7 +99,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	}
 
 	public function getPartClassFacetOutput(array &$results) {
-		
 		header("Access-Control-Allow-Origin: *");
                 header("Content-Type: application/json");
 
@@ -123,8 +115,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 			}
                 }
 		$results = array_merge($results, $new_results);
-		//$this->addSearchResultCountForFacet($results, "part_classes");
-
                 return json_encode($results);
 	}
 
@@ -134,7 +124,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string HTML div of search result entry
 	*/
 	public function getSearchResultOutput(array $result) {
-
 		$html = "<div class=\"result-list-item\" id=\"" . $result['procurement'] . "\">";
 		$html .= "<div><span>Order URI</span>: " . $result['procurement'] . "</div>";
 	
@@ -142,7 +131,8 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		$html .= "<div><span>Order number</span>: " . $result['order_number'] . "</div>";
 
 		// Purchase order lines 
-		$html .= "<div><div class=\"expander-head\"  style=\"cursor:pointer\"><span>Order lines (click to <span class=\"expander-action\">expand</span>)</span></div>";
+		$order_line_count = $this->getOrderLineCountByProcurement($result['procurement']);
+		$html .= "<div><div class=\"expander-head\"  style=\"cursor:pointer\"><span>" . $order_line_count[0]['count'] . " Order lines (click to <span class=\"expander-action\">expand</span>)</span></div>";
 		$html .= "<div class=\"expander-content\" style=\"display:none\"></div></div>";
 	
 		$html .= "</div>";
@@ -155,7 +145,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string query header component (e.g. 'SELECT ?id ?label')
 	*/
 	public function getQueryHeader($type) {
-	
 		$header = "";
 		switch($type) {
 			case "procurements":
@@ -193,7 +182,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string query footer component (e.g. 'GROUP BY ?label ?id')
 	*/
 	public function getQueryFooter($type, $limit=null, $offset=0, $sort=null) {
-	
 		$footer = "";
 		switch($type) {
 			case "procurements":
@@ -201,15 +189,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 					if ($limit) $footer .= " LIMIT $limit OFFSET $offset";
 				}
 				break;
-			/*
-			case "count":
-			case "net_prices":
-			case "order_quantities":
-			case "award_dates":
-			case "purchase_order_change_dates":
-			case "data_in_db_dates":
-				break;
-			*/
 			default:
 				break;
 		}
@@ -222,22 +201,22 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	  * @return string WHERE clause component minus constraint clauses (e.g. '?dataset a dcat:Dataset . ')
 	  */
 	public function getQueryBody($type) {
-		
 		$body = "";
 		switch($type) {
+			case "cage_countries":
+				$body .= "?order_line log:hasCage [vcard:hasAddress [vcard:country-name ?id]] . ";
+				$body .= "BIND(str(?id) AS ?label) . ";
+				break;
 			case "net_prices":
 				$body .= "?order_line log:hasNetPrice ?number . ";
 				break;
-
 			case "order_quantities":
 				$body .= "?order_line log:hasOrderQuantity ?number . ";
 				break;
-
 			case "units_of_issue":
 				$body .= "?order_line log:hasUnitOfIssue ?id . ";
 				$body .= "BIND(str(?id) AS ?label) . ";
 				break;
-
 			case "part_classes":
 				$body .= "?id rdfs:subClassOf prod:PART . ";
 				$body .= "?id rdfs:label ?l . ";
@@ -245,32 +224,26 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 				$body .= "FILTER (!isBlank(?parent)) . ";
 				$body .= "BIND(str(?l) AS ?label) . ";
 				break;
-
 			case "award_dates":
 				$body .= "?order_line log:hasAwardDate ?d . "; 
 				$body .= "BIND(str(?d) AS ?date) . ";
 				break; 
-
 			case "purchase_order_change_dates":
 				$body .= "?order_line log:hasPurchaseOrderChangeDate ?d . "; 
 				$body .= "BIND(str(?d) AS ?date) . ";
 				break; 
-				
 			case "data_in_db_dates":
 				$body .= "?order_line log:hasDataInDbDate ?d . "; 
 				$body .= "BIND(str(?d) AS ?date) . ";
 				break; 
-				
 			case "count":
 				$body .= "?procurement a log:PurchaseOrder . ";
 				break;
-				
 			case "procurements":
 				$body .= "?procurement a log:PurchaseOrder . ";
 				$body .= "?procurement log:hasPurchaseOrderNumber ?order_number . ";
 				break;
 		}
-				
 		return $body;
 	}
 
@@ -280,14 +253,16 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string constraints component of SPARQL query
 	*/
 	public function getQueryConstraints(array $constraints) {
-		
 		$body = "";		
 		foreach($constraints as $constraint_type => $constraint_values) {
-			if ($constraint_type == "startDate") {
-				$body .= "?field_study vivo:dateTimeInterval [vivo:start [vivo:dateTime ?startDate]] . FILTER (?startDate >= \"" . $constraint_values . "T00:00:00\"^^xsd:dateTime) . ";
+			if ($constraint_type == "order_numbers") {
+				$body .= "?procurement log:hasPurchaseOrderNumber ?order_number . FILTER (contains(?order_number, \"" . $constraint_values[0] . "\")) . ?procurement log:hasPurchaseOrderLineNum ?order_line . ";
 			}
-			else if ($constraint_type == "endDate") {
-				$body .= "?field_study vivo:dateTimeInterval [vivo:end [vivo:dateTime ?endDate]] . FILTER (?endDate <= \"" . $constraint_values . "T00:00:00\"^^xsd:dateTime) . ";
+			else if ($constraint_type == "contract_numbers") {
+				$body .= "?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasContractNumber ?contract_number . FILTER (contains(?contract_number, \"" . $constraint_values[0] . "\")) . ";
+			}
+			else if ($constraint_type == "niins") {
+				$body .= "?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasNIIN ?niin . FILTER (contains(?niin, \"" . $constraint_values[0] . "\")) . ";
 			}
 			else {		
 				$arr = array();	
@@ -308,11 +283,13 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string constraint clause to be included in SPARQL query
 	*/	
 	public function getQueryConstraint($constraint_type, $constraint_value) {
-		
 		$body = "";
 		switch($constraint_type) {
 			case "part_classes":
 				$body .= "{ ?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasNIIN [log:hasProductNIIN [rdfs:subClassOf* <$constraint_value>]] . }";
+				break;
+			case "cage_countries":
+				$body .= "{ ?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasCage [vcard:hasAddress [vcard:country-name \"" . $constraint_value . "\"]] . }";
 				break;
 			case "net_prices":
 				$bounds = explode("~", $constraint_value);
@@ -337,17 +314,15 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		return $body;
 	}
 	
-    /**
-     * For each selection in a facet add a link to the context for that selection
-     *
-     * using the individual link for the different types as the context
-     * for the selection
-     *
-     * @param array $results selections to add context to
-	 * @param string $type search type (e.g. 'datasets', 'authors', 'keywords')
-     */
+	/**
+	* For each selection in a facet add a link to the context for that selection
+	* using the individual link for the different types as the context
+	* for the selection
+	*
+	* @param array $results selections to add context to
+	* @param string $type search type (e.g. 'datasets', 'authors', 'keywords')
+	*/
 	private function addContextLinks(&$results, $type) {
-		
 		if ($type == "communities" || $type == "groups" || $type == "participants") {
 			foreach ( $results as $i => $result ) {
 				$results[$i]['context'] = $result['id']; 
@@ -355,34 +330,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		}
 	}
 
-	private function addSearchResultCountForFacet(&$results, $type) {
-
-		switch($type) {
-			case "units_of_issue":
-				foreach ($results as $i => $result) {
-					$unit = $result['label'];
-					//$query = $this->getPrefixes();
-					$query = "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
-					$query .= "?procurement log:hasPurchaseOrderLineNum [log:hasUnitOfIssue \"$unit\"] . } ";
-					$count = $this->getProcurementCountByConstraint($unit, $query);
-					$results[$i]['count'] = $count[0]['count'];
-				}
-				break;
-			case "part_classes":
-				foreach ($results as $i => $result) {
-					$partClass = $result['id'];
-					//$query = $this->getPrefixes();
-					$query = "SELECT (COUNT(DISTINCT ?procurement) AS ?count) WHERE { ";
-					$query .= "?procurement log:hasPurchaseOrderLineNum [log:hasNIIN [log:hasProductNIIN [rdfs:subClassOf* <$partClass>]]] . } ";
-					$count = $this->getProcurementCountByConstraint($partClass, $query);
-					$results[$i]['count'] = $count[0]['count'];
-				}
-				break;
-			default:
-				break;
-		}
-	}
-	
 	/**
 	* Return representation (HTML or JSON) of response to send to client
 	* @param array $results array of associative arrays with bindings from query execution
@@ -393,8 +340,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	* @return string representation of response to client
 	*/
 	public function getOutput(array $results, $type, array $constraints, $limit=0, $offset=0) {
-		
-		// Output for the request type "field_studies"			
 		if ($type == "procurements") {
 			$count = $this->getSearchResultCount($constraints);						
 			return $this->getSearchResultsOutput($results, $limit, $offset, $count);
@@ -404,7 +349,6 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		}
 		else {		
 			//$this->addContextLinks($results, $type);
-			//$this->addSearchResultCountForFacet($results, $type);
 			return $this->getFacetOutput($results);
 		}
 	}

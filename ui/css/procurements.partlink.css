@@ -37,7 +37,7 @@ div.popup-text p {
 }
 
 div.expander-head {
-	background-position: 25% 60%;
+	background-position: 31% 50%;
 	background-repeat: no-repeat;
 	background-size: 12px 12px;
 	background-image: url(../images/collapsed.png);
@@ -86,7 +86,7 @@ div.cage-map-info-window-content span {
 	font-weight: bold
 }
 
-div.niin-info-dialog {
+div.ui-dialog-content {
 	font-family: Verdana,Arial,sans-serif;
 	font-size: 0.8em
 }

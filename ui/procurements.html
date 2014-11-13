@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
 		<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-		<title>PartLink Procurements</title>
+		<title>PartLink Purchase Orders</title>
 		<link rel="stylesheet" href="css/jquery-ui-1.10.0.custom.css" type="text/css">
 		<link rel="stylesheet" href="css/partlink.custom.css" type="text/css">
 		<link rel="stylesheet" href="css/procurements.partlink.css" type="text/css">
@@ -36,10 +36,13 @@
 						'paradigm' : 'http://escience.rpi.edu/ontology/sesf/s2s-core/4/0/HierarchicalSearch',
 						'inputs' : [
 							{'name' : s2sConfOntURI + 'PartClasses', 'enabled' : true, 'widget' : s2sConfOntURI + 'HierarchyFacetedSelect'},
+							{'name' : s2sConfOntURI + 'CageCountries', 'enabled' : true, 'widget' : s2sConfOntURI + 'ContextSelect'},
+							{'name' : s2sConfOntURI + 'UnitsOfIssue', 'enabled' : true, 'widget' : s2sConfOntURI + 'ContextSelect'},
 							{'name' : s2sConfOntURI + 'NetPrices', 'enabled' : true, 'widget' : s2sConfOntURI + 'RangeSliderWidget'},
 							{'name' : s2sConfOntURI + 'OrderQuantities', 'enabled' : true, 'widget' : s2sConfOntURI + 'RangeSliderWidget'},
-							{'name' : s2sConfOntURI + 'UnitsOfIssue', 'enabled' : true, 'widget' : s2sConfOntURI + 'ContextSelect'},
-							//{'name' : s2sConfOntURI + 'ContractNumbers', 'enabled' : true, 'widget' : s2sConfOntURI + 'GenericWidget'},
+							{'name' : s2sConfOntURI + 'OrderNumbers', 'enabled' : true, 'widget' : s2sConfOntURI + 'GenericWidget'},
+							{'name' : s2sConfOntURI + 'ContractNumbers', 'enabled' : true, 'widget' : s2sConfOntURI + 'GenericWidget'},
+							{'name' : s2sConfOntURI + 'NIINs', 'enabled' : true, 'widget' : s2sConfOntURI + 'GenericWidget'},
 							//{'name' : s2sConfOntURI + 'AwardDates', 'enabled' : true, 'widget' : s2sConfOntURI + 'DynamicDateWidget'},
 							//{'name' : s2sConfOntURI + 'PurchaseOrderChangeDates', 'enabled' : true, 'widget' : s2sConfOntURI + 'DynamicDateWidget'},
 							//{'name' : s2sConfOntURI + 'DataInDBDates', 'enabled' : true, 'widget' : s2sConfOntURI + 'DynamicDateWidget'},
@@ -56,7 +59,7 @@
 		</script>
 	</head>
 	<body>
-		<h1>PartLink Purchase Orders</h1>
+		<h1>PartLink Purchase Order Browser</h1>
 	        <!-- The name attribute of this <div> specifies where UI components belonging to the named service -->
 		<!-- will be placed.  If you change the name of the service, in the $.ready() function, be sure to -->
                 <!-- adjust the name of this <div> as well. -->
