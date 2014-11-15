@@ -48,8 +48,8 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 	public function sparqlSelect($query) {
 		$options = array(
 			CURLOPT_FOLLOWLOCATION => true,
-			CURLOPT_CONNECTTIMEOUT => 5,
-			CURLOPT_TIMEOUT => 120
+			CURLOPT_CONNECTTIMEOUT => 120,
+			CURLOPT_TIMEOUT => 360 
 		);
 				
 		$encoded_query = 'query=' . urlencode($query) . '&output=' . urlencode('application/xml');
@@ -279,7 +279,7 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		$body = "";
 		switch($constraint_type) {
 			case "part_classes":
-				$body .= "{ ?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasNIIN [log:hasProductNIIN [rdfs:subClassOf* <$constraint_value>]] . }";
+				$body .= "{ ?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasNIIN [log:hasProductNIIN [rdfs:subClassOf+ <$constraint_value>]] . }";
 				break;
 			case "cage_countries":
 				$body .= "{ ?procurement log:hasPurchaseOrderLineNum ?order_line . ?order_line log:hasCage [vcard:hasAddress [vcard:country-name \"" . $constraint_value . "\"]] . }";
