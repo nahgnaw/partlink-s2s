@@ -25,13 +25,6 @@
     rdfs:label "PartLink Procurement Search Service"^^xsd:string ;
     rdfs:seeAlso "http://partlink.tw.rpi.edu/browsers/procurements.html"^^xsd:anyURI . 
 
-:ProcurementMapSearchService
-    core:hasOpenSearchDescriptionDocument "http://partlink.tw.rpi.edu/opensearch/descriptions/procurements.xml"^^xsd:anyURI ;
-    a core:OpenSearchService, owl:Thing ;
-    rdfs:comment "A map search service for partlink procurements."^^xsd:string ;
-    rdfs:label "PartLink Procurement Map Search Service"^^xsd:string ;
-    rdfs:seeAlso "http://partlink.tw.rpi.edu/browsers/procurements.html"^^xsd:anyURI . 
-
 :ContractNumbers
     core:hasDelimiter ";"^^xsd:string ;
     a s2s:Input, owl:Thing ;
