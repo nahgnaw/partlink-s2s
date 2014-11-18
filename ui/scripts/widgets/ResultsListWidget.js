@@ -67,6 +67,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 	jQuery(this.div).find(".html").children().remove();
 	jQuery(this.div).find(".page").children().remove();
 	jQuery(this.div).find(".html").append(data);
+
 	var self = this;
 
 	jQuery(".expander-head").click(function() {
@@ -110,17 +111,31 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 					jQuery(mapDiv).tooltip();
 					self.initializeMap(mapDiv, cageData);
 				});
+
 				jQuery("span.niin").click(function() {
 					var niin = this.id;
+					var dialog = jQuery("<div class=\"niin-info-dialog\" title=\"NIIN: " + niin.substring(35) + "\"></div>");
+					dialog.append("<p>Loading...</p>");
+					dialog.dialog({
+						width: 600,
+						show: {
+							effect: "blind",
+							duration: 200
+						},
+						hide: {
+							effect: "blind",
+							duration: 200
+						}	
+					});
+					dialog.tooltip();
 					jQuery.ajax({
 						url: queryServiceUrlPrefix + "niin_info&input=" + encodeURIComponent(niin)
 					}).done(function(data) {
 						data = jQuery.parseJSON(data);
-						var dialog = jQuery("<div class=\"niin-info-dialog\" title=\"NIIN: " + niin.substring(35) + "\"></div>");
 						if (typeof data == 'undefined') 
 							dialog.append("<p>No information returned for this NIIN. Please try to click it again.</p>");
 						else {
-							dialog.tooltip();
+							dialog.children().remove();
 							/*
 							if (data.hierarchy.length > 0) {
 								var div = jQuery("<div class=\"niin-info-hierarchy\"></div>");
@@ -221,17 +236,6 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 								});
 								dialog.append(table);
 							}
-							dialog.dialog({
-								width: 600,
-								show: {
-									effect: "blind",
-									duration: 200
-								},
-								hide: {
-									effect: "blind",
-									duration: 200
-								}	
-							});
 						}
 					});
 				});
@@ -249,6 +253,7 @@ edu.rpi.tw.sesf.s2s.widgets.ResultsListWidget.prototype.update = function(data)
 		}
 
         });
+
 
     	var nextCallback = function() {
 		if (self.limit == null)

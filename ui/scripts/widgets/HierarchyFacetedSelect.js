@@ -179,6 +179,17 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.showDialog = function(eventOb
 	}).done(function(data) {
 		data = jQuery.parseJSON(data)[0];
 		var dialog = jQuery("<div class=\"part-class-info-dialog\" title=\"" + data['label'] + "\"></div>");
+		jQuery(dialog).dialog({
+			width: 600,
+			show: {
+				effect: "blind",
+				duration: 200
+			},
+			hide: {
+				effect: "blind",
+				duration: 200
+			}
+		});
 		dialog.tooltip();
 		var table = jQuery("<table class=\"part-class-info-table\"></table>");
 		table.append("<tr><td>URI: </td><td>" + uri + "</td></tr>");
@@ -218,16 +229,5 @@ edu.rpi.tw.sesf.s2s.widgets.HierarchyFacetedSelect.showDialog = function(eventOb
 			else 
 				dialog.append(table);
 		});
-		jQuery(dialog).dialog({
-        	        width: 600,
-                	show: {
-                        	effect: "blind",
-                                duration: 200
-                        },
-                        hide: {
-                                effect: "blind",
-                                duration: 200
-                        }
-                });
 	}); 
 }

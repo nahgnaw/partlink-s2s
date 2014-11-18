@@ -49,7 +49,7 @@ class PartLink_Procurements_S2SConfig extends S2SConfig {
 		$options = array(
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_CONNECTTIMEOUT => 120,
-			CURLOPT_TIMEOUT => 360 
+			CURLOPT_TIMEOUT => 600 
 		);
 				
 		$encoded_query = 'query=' . urlencode($query) . '&output=' . urlencode('application/xml');
